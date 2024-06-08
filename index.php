@@ -36,6 +36,11 @@
         return isset($translations[$key]["NameTextMapHash"]) ? $translations[$key]["NameTextMapHash"] : $key;
     }
 
+    function chara_url($key) {
+        $translations = json_decode(file_get_contents("characters.json"), true);
+        return isset($translations[$key]["SideIconName"]) ? $translations[$key]["SideIconName"] : $key;
+    }
+
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Check the last query time
         $xml = simplexml_load_file('time.xml');
@@ -106,7 +111,8 @@
 
                     foreach ($equipRows as $index => $row) {
                         if ($index === 0) {
-                            echo "<tr><td rowspan='{$rowspan}'>{$characterName}</td>{$row}";
+                            $characterUrl = chara_url($avatar["avatarId"]);
+                            echo "<tr><td rowspan='{$rowspan}'>{$characterName}<br><img src='{$characterUrl}'></td>{$row}";
                         } else {
                             echo "<tr>{$row}";
                         }
