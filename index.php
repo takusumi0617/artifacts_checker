@@ -26,38 +26,39 @@
     </form>
 
     <?php
+    ini_set('display_errors', "On");
     function translate($key) {
-        $translations = json_decode(file_get_contents("loc.json"), true);
+        $translations = json_decode(file_get_contents(__DIR__ . "/loc.json"), true);
         return isset($translations["ja"][$key]) ? $translations["ja"][$key] : $key;
     }
 
     function chara_name($key) {
-        $translations = json_decode(file_get_contents("characters.json"), true);
+        $translations = json_decode(file_get_contents(__DIR__ . "/characters.json"), true);
         return isset($translations[$key]["NameTextMapHash"]) ? $translations[$key]["NameTextMapHash"] : $key;
     }
 
     function chara_url($key) {
-        $translations = json_decode(file_get_contents("characters.json"), true);
+        $translations = json_decode(file_get_contents(__DIR__ . "/characters.json"), true);
         return isset($translations[$key]["SideIconName"]) ? $translations[$key]["SideIconName"] : $key;
     }
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Check the last query time
-        $xml = simplexml_load_file('time.xml');
-        $lastQueryTime = (string)$xml->main->time;
+        $xml = simplexml_load_file(__DIR__ . '/time.xml');
+        $lastQueryTime = (string)$xml->time;
         $currentTime = time();
 
         if (empty($lastQueryTime) || $currentTime - (int)$lastQueryTime >= 60) {
             // Update the last query time
-            $xml->main->time = $currentTime;
-            $xml->asXML('time.xml');
+            $xml->time = $currentTime;
+            $xml->asXML(__DIR__ . '/time.xml');
 
             $uid = htmlspecialchars($_POST["uid"]);
             $apiUrl = "https://enka.network/api/uid/". $uid;
             $headers = array(
                 'Content-type: application/json; charset=UTF-8',
                 'Accept: application/json',
-                'User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)'
+                'User-Agent: Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36'
             );
 
             // cURLを使ってAPIリクエストを送信
@@ -67,6 +68,7 @@
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             $response = curl_exec($ch);
+            echo curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
             if ($response === FALSE) {
                 die('エラー: APIリクエストが失敗しました。');
             }
@@ -112,7 +114,7 @@
                     foreach ($equipRows as $index => $row) {
                         if ($index === 0) {
                             $characterUrl = chara_url($avatar["avatarId"]);
-                            echo "<tr><td rowspan='{$rowspan}'>{$characterName}<br><img src='{$characterUrl}'></td>{$row}";
+                            echo "<tr><td rowspan='{$rowspan}'>{$characterName}<br><img src='https://enka.network/ui/{$characterUrl}.png'></td>{$row}";
                         } else {
                             echo "<tr>{$row}";
                         }
