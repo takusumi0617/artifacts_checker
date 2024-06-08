@@ -3,6 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>UID照会</title>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+        }
+    </style>
 </head>
 <body>
     <form method="post">
@@ -37,7 +46,6 @@
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         $response = curl_exec($ch);
-        $httpcode = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
         if ($response === FALSE) {
             die('エラー: APIリクエストが失敗しました。');
         }
@@ -48,20 +56,44 @@
             $equipTypes = ["EQUIP_BRACER", "EQUIP_NECKLACE", "EQUIP_SHOES", "EQUIP_RING", "EQUIP_DRESS"];
             
             echo "<h2>装備情報:</h2>";
-            echo "<table border='1'>";
+            echo "<table>";
             echo "<tr><th>キャラクター名</th><th>装備タイプ</th><th>メインステータス</th><th>ステータス値</th></tr>";
+
+            $previousCharacterName = null;
+            $rowspan = 0;
 
             foreach ($data["avatarInfoList"] as $avatar) {
                 $characterName = translate(chara_name($avatar["avatarId"]));
+                $equipRows = [];
+
                 foreach ($avatar["equipList"] as $equip) {
-                    if (isset($equip["flat"]["equipType"])) {
-                    if (in_array($equip["flat"]["equipType"], $equipTypes)) {
+                    if (isset($equip["flat"]["equipType"]) && in_array($equip["flat"]["equipType"], $equipTypes)) {
                         $equipType = translate($equip["flat"]["equipType"]);
                         $mainPropId = translate($equip["flat"]["reliquaryMainstat"]["mainPropId"]);
                         $statValue = $equip["flat"]["reliquaryMainstat"]["statValue"];
-                        echo "<tr><td>{$characterName}</td><td>{$equipType}</td><td>{$mainPropId}</td><td>{$statValue}</td></tr>";
+                        
+                        // "パーセンテージ"または"率"が含まれている場合に"%"を付ける
+                        if (strpos($mainPropId, "パーセンテージ") !== false || strpos($mainPropId, "率") !== false) {
+                            $statValue .= "%";
+                        }
+
+                        $equipRows[] = "<td>{$equipType}</td><td>{$mainPropId}</td><td>{$statValue}</td></tr>";
                     }
                 }
+
+                if ($characterName === $previousCharacterName) {
+                    $rowspan++;
+                } else {
+                    $rowspan = count($equipRows);
+                    $previousCharacterName = $characterName;
+                }
+
+                foreach ($equipRows as $index => $row) {
+                    if ($index === 0) {
+                        echo "<tr><td rowspan='{$rowspan}'>{$characterName}</td>{$row}";
+                    } else {
+                        echo "<tr>{$row}";
+                    }
                 }
             }
             echo "</table>";
