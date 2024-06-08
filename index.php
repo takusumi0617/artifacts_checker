@@ -29,6 +29,10 @@
         $translations = json_decode(file_get_contents("characters.json"), true);
         return isset($translations[$key]["NameTextMapHash"]) ? $translations[$key]["NameTextMapHash"] : $key;
     }
+    function chara_url($key) {
+        $translations = json_decode(file_get_contents("characters.json"), true);
+        return isset($translations[$key]["SideIconName"]) ? $translations[$key]["SideIconName"] : $key;
+    }
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $uid = htmlspecialchars($_POST["uid"]);
@@ -64,6 +68,7 @@
 
             foreach ($data["avatarInfoList"] as $avatar) {
                 $characterName = translate(chara_name($avatar["avatarId"]));
+                $characterpicurl = "https://enka.network/ui/" . chara_url($avatar["avatarId"]) . ".png";
                 $equipRows = [];
 
                 foreach ($avatar["equipList"] as $equip) {
@@ -90,7 +95,7 @@
 
                 foreach ($equipRows as $index => $row) {
                     if ($index === 0) {
-                        echo "<tr><td rowspan='{$rowspan}'>{$characterName}</td>{$row}";
+                        echo "<tr><td rowspan='{$rowspan}'>{$characterName}<br><img src='{$characterpicurl}'/></td>{$row}";
                     } else {
                         echo "<tr>{$row}";
                     }
