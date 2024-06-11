@@ -26,7 +26,6 @@
     </form>
 
     <?php
-    //ぴきーん
     ini_set('display_errors', "On");
     function translate($key) {
         $translations = json_decode(file_get_contents(__DIR__ . "/loc.json"), true);
