@@ -6,7 +6,7 @@ public class 計算式//←ここにファイル名を
         int k,i,ni;
         double s;
         System.out.print("");
-        System.out.print("日数を入力");
+        System.out.print("日数を入力-->");
         ni=scan.nextInt;
         s=ni*24+6;
         System.out.print("s+"時間");
