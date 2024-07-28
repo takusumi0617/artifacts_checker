@@ -8,5 +8,6 @@ public class 計算式//←ここにファイル名を
         System.out.print("");
         System.out.print("日数を入力");
         time=scan.nextInt;
+        
     }
 }
